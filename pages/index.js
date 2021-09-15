@@ -1,12 +1,13 @@
 import { Page } from "@shopify/polaris";
 import { ResourcePicker} from "@shopify/app-bridge-react";
+import ProductList from "../components/orderList";
 
 class Index extends React.Component{
   state = {open: false}
   render(){
     return(
       <Page
-        title='Product selector'
+        title='Product selecto'
         primaryAction={{
           content:'Select products',
           onAction: ()=> this.setState({open: true})
@@ -18,6 +19,7 @@ class Index extends React.Component{
           onCancel= {()=> this.setState({open: false})}
           onSelection= { (resources)=> this.handleSelection(resources)}
         />
+        <ProductList></ProductList>
       </Page>
   
 
