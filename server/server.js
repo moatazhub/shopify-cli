@@ -99,6 +99,12 @@ app.prepare().then(async () => {
     }
   });
 
+  // router for dashboard
+  router.get("/dashboard", handleRequest); 
+
+  // router for about
+  router.get("/about", handleRequest); 
+
   server.use(router.allowedMethods());
   server.use(router.routes());
   server.listen(port, () => {
