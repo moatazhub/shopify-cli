@@ -101,9 +101,35 @@ app.prepare().then(async () => {
 
   // router for dashboard
   router.get("/dashboard", handleRequest); 
-
   // router for about
   router.get("/about", handleRequest); 
+  ////////////////////////////////////////////////////////////////////////
+  // add new carrire service
+  router.get('/addCarrier', verifyRequest(), async (ctx, res) => {
+   // const { shop, accessToken } = ctx.session;
+    const shop = ctx.query.shop;
+    const accessToken = ctx.query.accessToken;
+    const url = `https://${shop}/admin/api/2021-07/carrier_services.json`;
+
+    const shopifyHeader = (token) => ({
+        'Content-Type' : 'application/json',
+        'X-Shopify-Access-Token' : token
+    });
+
+    let payload = {
+        "carrier_service": {
+        "name": "EgyptExpress Fulfillment",
+        "callback_url": "https://professorfekrihassan.com/rates.php",
+        "service_discovery": true
+        }
+    }
+    
+    const addCarrier = await axios.post(url, payload, {headers : shopifyHeader(accessToken)});
+    ctx.body = addCarrier.data;
+    console.log(addCarrier.data);
+    ctx.res.statusCode = 200;
+});
+///////////////////////////////////////////////////////////////////////////
 
   server.use(router.allowedMethods());
   server.use(router.routes());

@@ -1,11 +1,11 @@
 import {Page, Heading} from '@shopify/polaris';
 
 const Aboutus = () => (
-    <page>
+    <Page>
         <Heading>
             about page
         </Heading>
-    </page>
+    </Page>
 );
 
 export default Aboutus;
