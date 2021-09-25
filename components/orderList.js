@@ -1,6 +1,7 @@
 import gql from 'graphql-tag';
 import {useQuery} from 'react-apollo';
-import {Card, ResourceList, ResourceItem, Stack, TextStyle, Thumbnail, Avatar} from '@shopify/polaris';
+import {Card, ResourceList, ResourceItem, Stack,  TextStyle} from '@shopify/polaris';
+import { useState } from 'react';
 
 const GET_ORDERS = gql`
 query{
@@ -29,50 +30,66 @@ query{
 function ProductList(){
 
     const {loading, error, data} = useQuery(GET_ORDERS)
-    if(loading) return <div>loading..</div>
+    if(loading) return <div>loading.</div>
     if(error) return <div>{error.message}</div>
+   // console.log('this is data',data.orders.edges)
+   // console.log('this is data',data.orders.edges[0].node.name)
 
-    console.log('this is data',data)
-
+   // const [selectedItems, setSelectedItems] = useState([]);
 
     return(
+     
+     
+      
+      
       <Card>
       <ResourceList
-        resourceName={{singular: 'customer', plural: 'customers'}}
-        items={[
-          {
-            id: 100,
-            url: 'customers/341',
-            name: 'Mae Jemison',
-            location: 'Decatur, USA',
-          },
-          {
-            id: 200,
-            url: 'customers/256',
-            name: 'Ellen Ochoa',
-            location: 'Los Angeles, USA',
-          },
-        ]}
+        resourceName={{singular: 'order', plural: 'orders'}}
+        items={data.orders.edges}
         renderItem={(item) => {
-          const {id, url, name, location} = item;
-          const media = <Avatar customer size="medium" name={name} />;
-    
+          const id = item.node.id;
+          const name = item.node.name;
+          const customer = item.node.customer.firstName;
+          const price = item.node.totalPriceSet.shopMoney.amount;
+
+         
           return (
             <ResourceItem
               id={id}
-              url={url}
-              media={media}
+              name={name}
+              customer={customer}
+              price={price}
               accessibilityLabel={`View details for ${name}`}
             >
-              <h3>
-                <TextStyle variation="strong">{name}</TextStyle>
-              </h3>
-              <div>{location}</div>
+              <Stack>
+                <Stack.Item fill>
+                  <h3>
+                    <TextStyle variation="strong">{name}</TextStyle>
+                  </h3>
+                </Stack.Item>
+                <Stack.Item fill>
+                  <h3>  
+                    <TextStyle variation="strong">{customer}</TextStyle>
+                  </h3>   
+                </Stack.Item>
+                <Stack.Item fill>
+                  <h3>  
+                    <TextStyle variation="strong">{price}</TextStyle>
+                  </h3>   
+                </Stack.Item>
+              </Stack>  
+
             </ResourceItem>
+
           );
-        }}
+        }
+        
+      }
+       
+        
       />
     </Card>
+   
     )
 }
 
