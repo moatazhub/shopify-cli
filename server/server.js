@@ -6,6 +6,9 @@ import Shopify, { ApiVersion } from "@shopify/shopify-api";
 import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
+//const axios = require('axios');
+import axios from "axios";
+import routes from './router/index';
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
@@ -30,6 +33,9 @@ Shopify.Context.initialize({
 // persist this object in your app.
 const ACTIVE_SHOPIFY_SHOPS = {};
 
+
+
+
 app.prepare().then(async () => {
   const server = new Koa();
   const router = new Router();
@@ -41,6 +47,27 @@ app.prepare().then(async () => {
         const { shop, accessToken, scope } = ctx.state.shopify;
         const host = ctx.query.host;
         ACTIVE_SHOPIFY_SHOPS[shop] = scope;
+        // register carrier service
+        // const url = `https://${shop}/admin/api/2021-07/carrier_services.json`;
+        // const shopifyHeader = {
+        //   'Content-Type' : 'application/json',
+        //   'X-Shopify-Access-Token' : accessToken
+        // };
+        // let payload = {
+        //   "carrier_service": {
+        //   "name": "EgyptExpress Fulfillment",
+        //   "callback_url": "https://0162-156-193-241-147.ngrok.io/api/shipping-rate",
+        //   "service_discovery": true
+        //   }
+        // }
+
+        // console.log('start before call carrier webhook');
+        // const addCarrier = await axios.post(url, payload, {headers : shopifyHeader});
+        // ctx.body = addCarrier.data;
+        // console.log(addCarrier.data);
+        // ctx.res.statusCode = 200;
+        // console.log('after carrier webhook');
+
 
         const response = await Shopify.Webhooks.Registry.register({
           shop,
@@ -55,6 +82,9 @@ app.prepare().then(async () => {
           console.log(
             `Failed to register APP_UNINSTALLED webhook: ${response.result}`
           );
+        }
+        else{
+          console.log('register APP_UNINSTALLED webhook...')
         }
 
         // Redirect to app with shop parameter upon auth
@@ -86,12 +116,45 @@ app.prepare().then(async () => {
     }
   );
 
+//   ////////////////////////////////////////////////////////////////////////
+//   // add new carrire service
+//   router.post('/addCarrier', verifyRequest(), async (ctx, res) => {
+//     // const { shop, accessToken } = ctx.session;
+//     console.log('start1 webhook');
+//      const shop = ctx.query.shop;
+//      const accessToken = ctx.query.accessToken;
+//      const url = `https://${shop}/admin/api/2021-07/carrier_services.json`;
+ 
+//      const shopifyHeader = (token) => ({
+//          'Content-Type' : 'application/json',
+//          'X-Shopify-Access-Token' : token
+//      });
+//      console.log('start2 webhook');
+//      let payload = {
+//          "carrier_service": {
+//          "name": "EgyptExpress Fulfillment",
+//          "callback_url": "https://professorfekrihassan.com/rates.php",
+//          "service_discovery": true
+//          }
+//      }
+//      console.log('start3 webhook');
+//      const addCarrier = await axios.post(url, payload, {headers : shopifyHeader(accessToken)});
+//      ctx.body = addCarrier.data;
+//      console.log(addCarrier.data);
+//      ctx.res.statusCode = 200;
+//      console.log('start4 webhook');
+//  });
+ ///////////////////////////////////////////////////////////////////////////
+
+  // use cobine route
+  server.use(routes());
+ 
   router.get("(/_next/static/.*)", handleRequest); // Static content is clear
   router.get("/_next/webpack-hmr", handleRequest); // Webpack content is clear
   router.get("(.*)", async (ctx) => {
     const shop = ctx.query.shop;
 
-    // This shop hasn't been seen yet, go through OAuth to create a session
+    // This shop hasn't been seen yet, go through OAuh to create a session
     if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
       ctx.redirect(`/auth?shop=${shop}`);
     } else {
@@ -103,33 +166,7 @@ app.prepare().then(async () => {
   router.get("/dashboard", handleRequest); 
   // router for about
   router.get("/about", handleRequest); 
-  ////////////////////////////////////////////////////////////////////////
-  // add new carrire service
-  router.get('/addCarrier', verifyRequest(), async (ctx, res) => {
-   // const { shop, accessToken } = ctx.session;
-    const shop = ctx.query.shop;
-    const accessToken = ctx.query.accessToken;
-    const url = `https://${shop}/admin/api/2021-07/carrier_services.json`;
-
-    const shopifyHeader = (token) => ({
-        'Content-Type' : 'application/json',
-        'X-Shopify-Access-Token' : token
-    });
-
-    let payload = {
-        "carrier_service": {
-        "name": "EgyptExpress Fulfillment",
-        "callback_url": "https://professorfekrihassan.com/rates.php",
-        "service_discovery": true
-        }
-    }
-    
-    const addCarrier = await axios.post(url, payload, {headers : shopifyHeader(accessToken)});
-    ctx.body = addCarrier.data;
-    console.log(addCarrier.data);
-    ctx.res.statusCode = 200;
-});
-///////////////////////////////////////////////////////////////////////////
+  
 
   server.use(router.allowedMethods());
   server.use(router.routes());

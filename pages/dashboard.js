@@ -3,6 +3,7 @@ import React from "react";
 
 class Dashboard extends React.Component {
     componentDidMount() {
+        console.log('in client');
         fetch('/addCarrier')
         .then((res) => res.json())
         .then((items) => console.log(items))
