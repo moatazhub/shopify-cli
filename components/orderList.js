@@ -35,11 +35,11 @@ function ProductList(){
    // console.log('this is data',data.orders.edges)
    // console.log('this is data',data.orders.edges[0].node.name)
 
-    const [selectedItems, setSelectedItems] = useState([]);
+   // const [selectedItems, setSelectedItems] = useState([]);
 
     return(
      
-     
+      
       
       <Card>
       <ResourceList
@@ -84,9 +84,6 @@ function ProductList(){
         }
         
       }
-        selectedItems={selectedItems}
-        onSelectionChange={setSelectedItems}
-        selectable
        
         
       />
