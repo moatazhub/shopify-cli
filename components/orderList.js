@@ -51,28 +51,7 @@ function ProductList(){
           const customer = item.node.customer.firstName;
           const price = item.node.totalPriceSet.shopMoney.amount;
 
-          const promotedBulkActions = [
-            {
-              content: 'Edit customers',
-              onAction: () => console.log('Todo: implement bulk edit'),
-            },
-          ];
-
-          const bulkActions = [
-            {
-              content: 'Add tags',
-              onAction: () => console.log('Todo: implement bulk add tags'),
-            },
-            {
-              content: 'Remove tags',
-              onAction: () => console.log('Todo: implement bulk remove tags'),
-            },
-            {
-              content: 'Delete customers',
-              onAction: () => console.log('Todo: implement bulk delete'),
-            },
-          ];
-          
+         
           return (
             <ResourceItem
               id={id}
@@ -108,8 +87,7 @@ function ProductList(){
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems}
         selectable
-        promotedBulkActions={promotedBulkActions}
-        bulkActions={bulkActions}
+       
         
       />
     </Card>
