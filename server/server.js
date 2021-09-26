@@ -47,7 +47,7 @@ app.prepare().then(async () => {
         const { shop, accessToken, scope } = ctx.state.shopify;
         const host = ctx.query.host;
         ACTIVE_SHOPIFY_SHOPS[shop] = scope;
-        // register carrier service
+        //register carrier service
         // const url = `https://${shop}/admin/api/2021-07/carrier_services.json`;
         // const shopifyHeader = {
         //   'Content-Type' : 'application/json',
@@ -56,7 +56,7 @@ app.prepare().then(async () => {
         // let payload = {
         //   "carrier_service": {
         //   "name": "EgyptExpress Fulfillment",
-        //   "callback_url": "https://0162-156-193-241-147.ngrok.io/api/shipping-rate",
+        //   "callback_url": "https://cddb42c1fb37.ngrok.io/api/shipping-rate",
         //   "service_discovery": true
         //   }
         // }

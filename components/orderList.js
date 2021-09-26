@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import {useQuery} from 'react-apollo';
-import {Card, ResourceList, ResourceItem, Stack,  TextStyle} from '@shopify/polaris';
-import { useState } from 'react';
+import {Card, ResourceList, ResourceItem, Stack,  TextStyle,Filters} from '@shopify/polaris';
+import { useState, useCallback } from 'react';
 
 const GET_ORDERS = gql`
 query{
@@ -35,15 +35,18 @@ function ProductList(){
    // console.log('this is data',data.orders.edges)
    // console.log('this is data',data.orders.edges[0].node.name)
 
-   // const [selectedItems, setSelectedItems] = useState([]);
+   const [selectedItems, setSelectedItems] = useState([]);
+  
+
+  
+  
+
 
     return(
      
-      
-      
       <Card>
       <ResourceList
-        resourceName={{singular: 'order', plural: 'orders'}}
+        resourceName={{singular: 'orders', plural: 'orders'}}
         items={data.orders.edges}
         renderItem={(item) => {
           const id = item.node.id;
@@ -85,7 +88,10 @@ function ProductList(){
         
       }
        
-        
+      selectedItems={selectedItems}
+      onSelectionChange={setSelectedItems}
+      selectable
+      
       />
     </Card>
     
