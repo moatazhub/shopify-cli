@@ -35,12 +35,29 @@ function ProductList(){
    // console.log('this is data',data.orders.edges)
    // console.log('this is data',data.orders.edges[0].node.name)
 
+   // const [selectedItems, setSelectedItems] = useState([]);
    const [selectedItems, setSelectedItems] = useState([]);
-  
+   const promotedBulkActions = [
+    {
+      content: 'Edit customers',
+      onAction: () => console.log('Todo: implement bulk edit'),
+    },
+  ];
 
-  
-  
-
+  const bulkActions = [
+    {
+      content: 'Add tags',
+      onAction: () => console.log('Todo: implement bulk add tags'),
+    },
+    {
+      content: 'Remove tags',
+      onAction: () => console.log('Todo: implement bulk remove tags'),
+    },
+    {
+      content: 'Delete customers',
+      onAction: () => console.log('Todo: implement bulk delete'),
+    },
+  ];
 
     return(
      
@@ -48,13 +65,21 @@ function ProductList(){
       <ResourceList
         resourceName={{singular: 'orders', plural: 'orders'}}
         items={data.orders.edges}
-        renderItem={(item) => {
-          const id = item.node.id;
+        renderItem={renderItem}
+        selectedItems={selectedItems}
+        onSelectionChange={setSelectedItems}
+        promotedBulkActions={promotedBulkActions}
+        bulkActions={bulkActions}
+           
+      />
+    </Card>
+    
+    );
+    function renderItem(item) {
+      const id = item.node.id;
           const name = item.node.name;
           const customer = item.node.customer.firstName;
           const price = item.node.totalPriceSet.shopMoney.amount;
-
-         
           return (
             <ResourceItem
               id={id}
@@ -64,7 +89,8 @@ function ProductList(){
               accessibilityLabel={`View details for ${name}`}
             >
               <Stack>
-                <Stack.Item fill>
+                
+                <Stack.Item fill >
                   <h3>
                     <TextStyle variation="strong">{name}</TextStyle>
                   </h3>
@@ -84,18 +110,12 @@ function ProductList(){
             </ResourceItem>
 
           );
-        }
-        
-      }
-       
-      selectedItems={selectedItems}
-      onSelectionChange={setSelectedItems}
-      selectable
-      
-      />
-    </Card>
-    
-    )
+
+    }
+
+    function resolveItemIds({id}) {
+      return id;
+    }
 }
 
 export default ProductList;

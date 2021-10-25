@@ -1,6 +1,7 @@
 import { mapCities, computeWieght } from "../helpers/helper";
 import { getRate } from "../rest_api/fedex/rate_finder";
 
+
 export async function getShippingRate(ctx){
 
    const resault = await parseShopifyRequest(ctx);
@@ -9,15 +10,18 @@ export async function getShippingRate(ctx){
 }
 
 async function parseShopifyRequest(ctx){
+    
 
     const buffers = [];
 
     for await (const chunk of ctx.req) {
         buffers.push(chunk);
     }
-
+    console.log('posted data from buffers',buffers);
     const data = Buffer.concat(buffers).toString();
     // data to be sent to egyptExpress
+    console.log('posted data from postman',data);
+   // ctx.disableBodyParser = true;
     const dataJson = JSON.parse(data);
     const shopifyOrigin = dataJson.rate.origin.province;
     const shopifyDestination = dataJson.rate.destination.province;
