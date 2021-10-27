@@ -20,7 +20,7 @@ function Aboutus() {
       // Runs once, after mounting 
       async function fetchUser() {
         const shop_url = "mystagstore.myshopify.com";
-        const url = `https://95fd1458dd39.ngrok.io/api/users/${shop_url}`;
+        const url = `https://murmuring-sierra-22719.herokuapp.com/api/users/${shop_url}`;
               const result = await  axios.get(url);
               console.log(result.data);
              
@@ -47,7 +47,7 @@ function Aboutus() {
       setSubmitting(true);
       // calling API
       const shop_url = "mystagstore.myshopify.com";
-      const url = `https://95fd1458dd39.ngrok.io/api/users/${shop_url}`;
+      const url = `https://murmuring-sierra-22719.herokuapp.com/api/users/${shop_url}`;
       const payload = {
                 "account_number" : formData.account_number ,
                 "user_name" : formData.user_name,
