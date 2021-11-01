@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "b1aa0762f2947d",
-    "password": "065fccc9",
-    "database": "heroku_5a430751f6e76f7",
-    "host": "us-cdbr-east-04.cleardb.com",
+    "username": "root",
+    "password": "root",
+    "database": "shopify",
+    "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "test": {

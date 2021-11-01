@@ -3,7 +3,7 @@ import { getShippingRate } from '../controllers/shipping_rate_controller';
 import { getTrackingShipment } from '../controllers/track_shipment_controller';
 import { getPdfShipment } from '../controllers/pdf_shipment_controller';
 import { getShippingFulfilled } from '../controllers/shipping_fulfilled_controller';
-const {UserController} = require('../controllers');
+const {UserController, AppSession} = require('../controllers');
 const koaBody = require('koa-body');
 
 
@@ -86,12 +86,20 @@ router.post('/shipping-track', async (ctx) => {
     
   //    ctx.body = {accountNum, password, userName};
   // });
-     
+     // user routes
      router.get('/users/:id',UserController.findOne);
      router.post('/users',UserController.create);
      
      router.get('/users',UserController.find); 
      router.delete('/users/:id', UserController.destroy);
      router.put('/users/:shop_url',koaBody(),UserController.update);
+
+     // appSession routes
+     router.get('/sessions/:sessionId',AppSession.findOne);
+     router.post('/sessions',koaBody(),AppSession.create);
+     
+     router.get('/sessions',AppSession.find); 
+     router.delete('/sessions/:sessionId', AppSession.destroy);
+     router.put('/sessions/:sessionId',koaBody(),AppSession.update);
 
 export default router; 

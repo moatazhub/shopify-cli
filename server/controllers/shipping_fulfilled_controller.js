@@ -131,10 +131,10 @@ async function parseShopifyRequest(ctx){
     // // prepare params to update tracking number
     const trackingNumber = result.AirwayBillNumber;
     const orderId = dataJson.id;
-    const fulfillmentId = '123456789';//dataJson.fulfillments[0][id];
+    const fulfillmentId = dataJson.fulfillments[0].id;
 
-     const shop_url = "arfaaa.myshopify.com";
-     const access_token = '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';
+     const shop_url = "https://mystagstore.myshopify.com";
+     const access_token = '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';
 
     //const { shop, accessToken } = ctx.state.shopify;
 
@@ -155,7 +155,7 @@ async function parseShopifyRequest(ctx){
     const resultUpdateTrack = await getUpdateTrack(payloadToUpdateTrack,shop_url, access_token, orderId, fulfillmentId)
 
     
-    // //update tracking link
+    // update tracking link
 
     return result;
     
