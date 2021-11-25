@@ -11,8 +11,16 @@ import axios from "axios";
 import routes from './router/index';
 import fs from 'fs';
 import {Session} from '@shopify/shopify-api/dist/auth/session';
+import {PrismaClient} from '@prisma/client';
+
+import {storeCallback, loadCallback, deleteCallback} from './custom-sessions.js';
 //import { FORCE } from "sequelize/types/lib/index-hints";
-const bodyParser = require('koa-parser');
+//const bodyParser = require('koa-parser');
+const koaBody = require('koa-body');
+const bodyParser = require('koa-bodyparser');
+const {HookService} = require('./webhooks');
+
+const prisma = new PrismaClient();
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
@@ -23,29 +31,6 @@ const app = next({
 const handle = app.getRequestHandler();
 
 const FILENAME = './session.json';
-function storeCallback(session){
-  console.log('storeCallback ',session);
-  fs.writeFileSync(FILENAME, JSON.stringify(session));
-  return true;
-}
-function loadCallback(id){
-  console.log('loadCallback ',id);
-  if(fs.existsSync(FILENAME)){
-    const sessionResult = fs.readFileSync(FILENAME,'utf8');
-    return Object.assign(
-      new Session,
-      JSON.parse(sessionResult)); 
-  }
-  return false;  
-}
-function deleteCallback(id){
-  console.log('deleteCallback', id);
-}
-const sessionStorage = new Shopify.Session.CustomSessionStorage(
-  storeCallback,
-  loadCallback,
-  deleteCallback
-)
 
 Shopify.Context.initialize({
   API_KEY: process.env.SHOPIFY_API_KEY,
@@ -55,7 +40,12 @@ Shopify.Context.initialize({
   API_VERSION: ApiVersion.April21,
   IS_EMBEDDED_APP: true,
   // This should be replaced with your preferred storage strategy
-  SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),//sessionStorage,
+  //SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),//sessionStorage,
+  SESSION_STORAGE: new Shopify.Session.CustomSessionStorage(
+    storeCallback,
+    loadCallback,
+    deleteCallback
+  ),
 });
 
 // Storing the currently active shops in memory will force them to re-login when your server restarts. You should
@@ -81,7 +71,7 @@ app.prepare().then(async () => {
         // Access token and shop available in ctx.state.shopify
         const { shop, accessToken, scope } = ctx.state.shopify;
         const host = ctx.query.host;
-        ACTIVE_SHOPIFY_SHOPS[shop] = scope;
+       // ACTIVE_SHOPIFY_SHOPS[shop] = scope;
 
         const response = await Shopify.Webhooks.Registry.register({
           shop,
@@ -104,32 +94,25 @@ app.prepare().then(async () => {
         console.log('shop ',shop);
         console.log('access ',accessToken);
 
+        await HookService.addCarrierService(shop, accessToken);
+        await HookService.addOrderFulfilled(shop, accessToken);
+        await HookService.addAppUninstall(shop, accessToken);
 
-        //   ////////////////////////////////////////////////////////////////////////
-//   // add new carrire service
-       
-        //  const url = `https://${shop}/admin/api/2021-07/carrier_services.json`;
-    
-        // const shopifyHeader = (token) => ({
-        //     'Content-Type' : 'application/json',
-        //     'X-Shopify-Access-Token' : token
-        // })
-        // console.log('start2 webhook');
-        // let payload = {
-        //     "carrier_service": {
-        //     "name": "EgyptExpress Rate",
-        //     "callback_url": "https://95fd1458dd39.ngrok.io/api/shipping-rate",
-        //     "service_discovery": true
-        //     }
-        // }
-        // console.log('start3 webhook');
-        // const addCarrier = await axios.post(url, payload, {headers : shopifyHeader(accessToken)});
-        // ctx.body = addCarrier.data;
-        // console.log(addCarrier.data);
-        // ctx.res.statusCode = 200;
-        // console.log('start4 webhook');
- 
- 
+        // create new user
+        const user = await prisma.user.create({
+          data: {
+            account_number: 'EGV26o+Ie18pfk93HhpX2w==',
+            user_name: 'ELSFQA',
+            password: 'ZLRGVp+ZyjT6hW8Xg1PJBA==',
+            country: 'Egypt',
+            shop_url: shop,
+          },
+          }).then(_ => {
+            console.log('new user created.')
+          }).catch(err => {
+            console.log('can not create user: ',err)
+          })  
+        
 
         // Redirect to app with shop parameter upon auth
         ctx.redirect(`/?shop=${shop}&host=${host}`);
@@ -152,6 +135,8 @@ app.prepare().then(async () => {
     }
   });
 
+
+
   router.post(
     "/graphql",
     verifyRequest({ returnHeader: true }),
@@ -160,70 +145,67 @@ app.prepare().then(async () => {
     }
   );
 
-//   ////////////////////////////////////////////////////////////////////////
-//   // add new carrire service
-//   router.post('/addCarrier', verifyRequest(), async (ctx, res) => {
-//     // const { shop, accessToken } = ctx.session;
-//     console.log('start1 webhook');
-//      const shop = ctx.query.shop;
-//      const accessToken = ctx.query.accessToken;
-//      const url = `https://${shop}/admin/api/2021-07/carrier_services.json`;
- 
-//      const shopifyHeader = (token) => ({
-//          'Content-Type' : 'application/json',
-//          'X-Shopify-Access-Token' : token
-//      });
-//      console.log('start2 webhook');
-//      let payload = {
-//          "carrier_service": {
-//          "name": "EgyptExpress Fulfillment",
-//          "callback_url": "https://4f02006c4ad8.ngrok.io/api/shipping-rate",
-//          "service_discovery": true
-//          }
-//      }
-//      console.log('start3 webhook');
-//      const addCarrier = await axios.post(url, payload, {headers : shopifyHeader(accessToken)});
-//      ctx.body = addCarrier.data;
-//      console.log(addCarrier.data);
-//      ctx.res.statusCode = 200;
-//      console.log('start4 webhook');
-//  });
- ///////////////////////////////////////////////////////////////////////////
- 
+  
+
   //server.use(bodyParser());
 
-  
-  
-  
-  //server.use(bodyParser());
+
+  //server.use(koaBody());
 
   // use cobine route
+
+  // // use injection middle
+  // async function injectSession(ctx, next){
+  //   const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
+  //   if(session?.shop && session?.accessToken){
+  //     const client = new Shopify.Clients.Rest(
+  //       session.shop,
+  //       session.accessToken
+  //     ); 
+  //     ctx.MyClient = client;
+  //   }
+  //   return next();
+  // }
+  // server.use(injectSession);
+  //server.use(koaBody());  
   server.use(routes());
-
   
-
  
   router.get("(/_next/static/.*)", handleRequest); // Static content is clear
   router.get("/_next/webpack-hmr", handleRequest); // Webpack content is clear
   router.get("(.*)", async (ctx) => {
     const shop = ctx.query.shop;
 
+   
+    const checkShop = await prisma.shopSession.findFirst({
+      where: { shop: shop}
+    })
+
     // This shop hasn't been seen yet, go through OAuh to create a session
-    if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
+    if (checkShop === null) {
       ctx.redirect(`/auth?shop=${shop}`);
     } else {
       await handleRequest(ctx);
     }
+    // if (ACTIVE_SHOPIFY_SHOPS[shop] === undefined) {
+    //   ctx.redirect(`/auth?shop=${shop}`);
+    // } else {
+    //   await handleRequest(ctx);
+    // }
   });
 
+ 
+  // router for index
+  //router.get("/index", handleRequest); 
   // router for dashboard
   router.get("/dashboard", handleRequest); 
   // router for about
   router.get("/about", handleRequest); 
   
-
+  // Register routing middleware
   server.use(router.allowedMethods());
   server.use(router.routes());
+  
 
   const db = require('../models');
   db.sequelize.sync()

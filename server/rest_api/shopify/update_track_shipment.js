@@ -10,13 +10,16 @@ export async function getUpdateTrack(payloadToUpdateTrack,shop_url, access_token
     const url = `${shop_url}/admin/api/2021-07/orders/${orderId}/fulfillments/${fulfillmentId}.json`;
 
     const header = {
-        'Content-Type' : 'application/json',
-        'X-Shopify-Access-Token' : access_token 
+        "Content-Type" : "application/json",
+        "X-Shopify-Access-Token" : "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", 
+    }
+    const confg = {
+        headers: {Authorization: `Bearer ${access_token}`}
     }
     const body = payloadToUpdateTrack;
     try{
     
-        const result = await axios.post(url, body, header);
+        const result = await axios.put(url, body, header);
         console.log(JSON.stringify(result.data))
         return result.data;
 

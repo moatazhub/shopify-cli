@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE `user` MODIFY `company` VARCHAR(191) NULL,
+    MODIFY `country` VARCHAR(191) NULL,
+    MODIFY `city` VARCHAR(191) NULL,
+    MODIFY `email` VARCHAR(191) NULL,
+    MODIFY `address1` VARCHAR(191) NULL,
+    MODIFY `address2` VARCHAR(191) NULL,
+    MODIFY `contact` VARCHAR(191) NULL,
+    MODIFY `mobile` VARCHAR(191) NULL;

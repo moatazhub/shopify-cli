@@ -5,6 +5,11 @@ import { getPdfShipment } from '../controllers/pdf_shipment_controller';
 import { getShippingFulfilled } from '../controllers/shipping_fulfilled_controller';
 const {UserController, AppSession} = require('../controllers');
 const koaBody = require('koa-body');
+//const bodyParser = require('koa-parser');
+const bodyParser = require('koa-bodyparser');
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 
 const router = new Router({prefix: '/api'});
@@ -49,6 +54,41 @@ router.post('/shipping-fulfilled', async (ctx) => {
     
   });
 
+  router.post('/app-uninstalled', async (ctx) => {
+           
+           console.log('app uninstall handeler.....');
+
+           const buffers = [];
+
+            for await (const chunk of ctx.req) {
+                buffers.push(chunk);
+            }
+            console.log('posted data from buffers',buffers);
+            const data = Buffer.concat(buffers).toString();
+            // data to be sent to egyptExpress
+            console.log('posted data from postman',data);
+            const dataJson = JSON.parse(data);
+            const domain = dataJson.domain;
+            const deleteShop = await prisma.shopSession.delete({
+              where: { shop: domain }
+              }).then(_ => {
+                  console.log('delet shop :', domain);
+              }).catch(err => {
+                  console.log('can not delete shop :',err);
+              })
+
+              const deleteUser = await prisma.user.delete({
+                where: {
+                  shop_url: domain,
+                }}).then(_ => {
+                  console.log('delet user.');
+                }).catch(err => {
+                  console.log('can not delete user.',err);
+                })
+
+      
+    });
+
 
 
 router.post('/shipping-track', async (ctx) => {
@@ -87,12 +127,36 @@ router.post('/shipping-track', async (ctx) => {
   //    ctx.body = {accountNum, password, userName};
   // });
      // user routes
-     router.get('/users/:id',UserController.findOne);
+     router.put('/users',koaBody(),UserController.update);
+    // router.put('/users/:id',koaBody(),async (ctx) =>{
+    //   console.log('put request..');
+    //   console.log(ctx.request.body);
+    //   const updateUser = await prisma.user.update({
+    //     where: {
+    //         shop_url : ctx.params.id,
+    //     },
+    //     data: {
+    //         account_number : ctx.request.body.account_number,  
+    //         user_name : ctx.request.body.user_name,
+    //         password : ctx.request.body.password,
+    //         company : ctx.request.body.company, 
+    //         country : ctx.request.body.country, 
+    //         city : ctx.request.body.city, 
+    //         email : ctx.request.body.email, 
+    //         address1 : ctx.request.body.address1, 
+    //         address2 : ctx.request.body.address2, 
+    //         contact : ctx.request.body.contact, 
+    //         mobile : ctx.request.body.mobile, 
+    //         password : ctx.request.body.password,   
+    //     },
+    //   })
+    // })
+     router.get('/users',UserController.findOne);
      router.post('/users',UserController.create);
      
      router.get('/users',UserController.find); 
      router.delete('/users/:id', UserController.destroy);
-     router.put('/users/:shop_url',koaBody(),UserController.update);
+     
 
      // appSession routes
      router.get('/sessions/:sessionId',AppSession.findOne);

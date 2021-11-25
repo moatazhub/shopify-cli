@@ -1,7 +1,8 @@
-import {Page, Heading, Form, FormLayout, TextField, Button} from '@shopify/polaris';
+import {Page, Heading, Form, FormLayout, TextField, Button, Select, Card, Spinner, Layout, Banner} from '@shopify/polaris';
 import {useCallback, useState, useReducer, useEffect} from 'react';
 import axios from 'axios';
-
+import {useAppBridge} from '@shopify/app-bridge-react';
+import {getSessionToken} from '@shopify/app-bridge-utils';
 
 const formReducer = (state, event) => {
   return {
@@ -12,17 +13,24 @@ const formReducer = (state, event) => {
 
 function Aboutus() {
     
-    
+    const app = useAppBridge();
     const [formData, setFormData] = useReducer(formReducer, {});
     const [submitting, setSubmitting] = useState(false);
+
+   
+  
+    
 
     useEffect(() => {
       // Runs once, after mounting 
       async function fetchUser() {
-        const shop_url = "mystagstore.myshopify.com";
-        const url = `https://murmuring-sierra-22719.herokuapp.com/api/users/${shop_url}`;
-              const result = await  axios.get(url);
-              console.log(result.data);
+        const token = await getSessionToken(app);
+        console.log('session token : ',token);
+       
+        ////const id = "mystagstore.myshopify.com";
+        const url = `https://10278f51fe83.ngrok.io/api/users`;
+        const result = await  axios.get(url,{ headers: { Authorization: `Bearer ${token}` }});
+        console.log(result.data);
              
               // var user = result.data.filter(function (obj) { 
               //     return obj.shop_url === shop_url; 
@@ -40,14 +48,14 @@ function Aboutus() {
        
     }, []);
 
-    
-    
+       
     const handleSubmit = async event => {
+      const token = await getSessionToken(app);
       event.preventDefault();
       setSubmitting(true);
       // calling API
-      const shop_url = "mystagstore.myshopify.com";
-      const url = `https://murmuring-sierra-22719.herokuapp.com/api/users/${shop_url}`;
+      //const id = "mystagstore.myshopify.com";
+      const url = `https://10278f51fe83.ngrok.io/api/users`;
       const payload = {
                 "account_number" : formData.account_number ,
                 "user_name" : formData.user_name,
@@ -60,10 +68,10 @@ function Aboutus() {
                 "address2" : formData.address2,
                 "contact" : formData.contact,
                 "mobile" : formData.mobile,
-               // "shop_url" : formData.shop_url
+                "shop_url" : formData.shop_url
  
             }
-      const result = await  axios.put(url, payload);            
+      const result = await axios.put(url, payload, { headers: { Authorization: `Bearer ${token}` }});            
       console.log(result.data);
 
       setTimeout(() => {
@@ -77,83 +85,285 @@ function Aboutus() {
         value: event.target.value,
       });
     }
-  
+
+    const handleChange2 = (value, id) => {
+      setFormData({
+        name: id,
+        value: value,
+      });
+    }
+    
+   
+
+    const cities = [
+      {
+        id: 'SU',
+        name: '6th of October',     
+      },
+      {
+        id: 'SHR',
+        name: 'Al Sharqia',   
+      },
+      {
+        id: 'ALX',
+        name: 'Alexandria',   
+      },
+      {
+        id: 'ASN',
+        name: 'Aswan',   
+      },
+      {
+        id: 'AST',
+        name: 'Asyut',   
+      },
+      {
+        id: 'BH',
+        name: 'Beheira',   
+      },
+      {
+        id: 'BNS',
+        name: 'Beni Suef',   
+      },
+      {
+        id: 'C',
+        name: 'Cairo',   
+      },
+      {
+        id: 'DK',
+        name: 'Dakahlia',   
+      },
+      {
+        id: 'DT',
+        name: 'Damietta',   
+      },
+      {
+        id: 'FYM',
+        name: 'Faiyum',   
+      },
+      {
+        id: 'GH',
+        name: 'Gharbia',   
+      },
+      {
+        id: 'GZ',
+        name: 'Giza',   
+      },
+      {
+        id: 'HU',
+        name: 'Helwan',   
+      },
+      {
+        id: 'IS',
+        name: 'Ismailia',   
+      },
+      {
+        id: 'KFS',
+        name: 'Kafr el-Sheikh',   
+      },
+      {
+        id: 'LX',
+        name: 'Luxor',   
+      },
+      {
+        id: 'MT',
+        name: 'Matrouh',   
+      },
+      {
+        id: 'MN',
+        name: 'Minya',   
+      },
+      {
+        id: 'MNF',
+        name: 'Monufia',   
+      },
+      {
+        id: 'WAD',
+        name: 'New Valley',   
+      },
+      {
+        id: 'SIN',
+        name: 'North Sinai',   
+      },
+      {
+        id: 'PTS',
+        name: 'Port Said',   
+      },
+      {
+        id: 'KB',
+        name: 'Qalyubia',   
+      },
+      {
+        id: 'KN',
+        name: 'Qena',   
+      },
+      {
+        id: 'BA',
+        name: 'Red Sea',   
+      },
+      {
+        id: 'SHG',
+        name: 'Sohag',   
+      },
+      {
+        id: 'JS',
+        name: 'South Sinai',   
+      },
+      {
+        id: 'SUZ',
+        name: 'Suez',   
+      },
+     
+    ]
+
+    const cityRows = [];
+    for (let city of cities) {
+      if(city.id === formData.city)
+        cityRows.push(<option key={city.id} selected='selected' value={city.id}>{city.name}</option>);
+      cityRows.push(<option key={city.id} value={city.id}>{city.name}</option>);
+    }
+
     return (
+
+     
        <Page
-        breadcrumbs={[{content: 'Settings', url: '/apps/egypt-express-app/dashboard'}]}
-        title="Generals"
+        
+        title="General Setting"
         divider
         >  
-        {submitting &&
-       <div>
-         You are submitting the following:
-         <ul>
-           {Object.entries(formData).map(([name, value]) => (
-             <li key={name}><strong>{name}</strong>:{value.toString()}</li>
-           ))}
-         </ul>
-       </div>
-      }
-      <Form onSubmit={handleSubmit}>
+        
+       
+       
+      <Layout.AnnotatedSection
+    id="storeDetails"
+    title="Setting details"
+    description="Please set up your company's data to run our shipping app successfully."
+  >
+     
+      <Form  onSubmit={handleSubmit}>
         <FormLayout>
          
-        <fieldset>
-          <label>
-            <p>Account Number</p>
-            <input name="account_number" onChange={handleChange} value={formData.account_number || ''}/>
-          </label>
-          <label>
-            <p>Account Name</p>
-            <input name="user_name" onChange={handleChange} value={formData.user_name || ''}/>
-          </label>
-          <label>
-            <p>Password</p>
-            <input name="password" onChange={handleChange} value={formData.password || ''}/>
-          </label>
-          <label>
-            <p>Company</p>
-            <input name="company" onChange={handleChange} value={formData.company || ''}/>
-          </label>
-          <label>
-            <p>Country</p>
-            <input name="country" onChange={handleChange} value={formData.country || ''}/>
-          </label>
+        <TextField 
+            id="account_number"
+            name="account_number"
+            label="Account Number"
+            value={formData.account_number || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+           <TextField
+            id="user_name"
+            name="user_name"
+            label="User Name"
+            value={formData.user_name || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+           <TextField
+            id="password"
+            name="password"
+            label="Password"
+            type="password"
+            value={formData.password || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+
+           <TextField
+            id="company"
+            name="company"
+            label="Company"
+            value={formData.company || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+         
+         <TextField
+            id="country"
+            name="country"
+            label="Country"
+            
+            value={formData.country || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+          
           <label>
             <p>City</p>
-            <input name="city" onChange={handleChange} value={formData.city || ''}/>
-          </label>
-          <label>
-            <p>Email</p>
-            <input name="email" onChange={handleChange} value={formData.email || ''}/>
-          </label>
-          <label>
-            <p>Address1</p>
-            <input name="address1" onChange={handleChange} value={formData.address1 || ''}/>
-          </label>
-          <label>
-            <p>Address2</p>
-            <input name="address2" onChange={handleChange} value={formData.address2 || ''}/>
-          </label>
-          <label>
-            <p>Contact</p>
-            <input name="contact" onChange={handleChange} value={formData.contact || ''}/>
-          </label>
-          <label>
-            <p>Mobile</p>
-            <input name="mobile" onChange={handleChange} value={formData.mobile || ''}/>
+            <select name="city"  onChange={handleChange}>
+               
+            {cityRows}
+                    
+            </select>
+            
           </label>
           
-           
-            <input hidden name="shop_url" onChange={handleChange} value={formData.shop_url || ''}/>
          
 
-        </fieldset>
 
+          <TextField
+            id="email"
+            name="Email"
+            label="Email"
+            inputMode="email"
+            type="email"
+            value={formData.email || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+          <TextField
+            id="address1"
+            name="address1"
+            label="Address1"
+            value={formData.address1 || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+          <TextField
+            id="address2"
+            name="address2"
+            label="Address2"
+            value={formData.address2 || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+         <TextField
+            id="mobile"
+            name="mobile"
+            label="Mobile"
+            value={formData.mobile || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+         
+         
+         
+         
+           
+          <input hidden name="shop_url" onChange={handleChange} value={formData.shop_url || ''}/> 
+         
+          <TextField
+            id="contact"
+            name="contact"
+            label="Contact"
+            value={formData.contact || ''}
+            onChange={handleChange2}
+            autoComplete="off"
+          />
+        
+        {submitting &&
+          <div>  
+            <Spinner accessibilityLabel="Spinner example" size="large" />
+          </div>
+          }
   
-          <Button submit>Submit</Button>
+          <Button submit>Update</Button>
+          
         </FormLayout>
       </Form>
+     
+      </Layout.AnnotatedSection>
       </Page>
+     
     );
   }
 

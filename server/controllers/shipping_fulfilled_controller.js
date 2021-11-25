@@ -1,30 +1,60 @@
 import { mapCities, computeWieght } from "../helpers/helper";
-import { getFulfilled } from "../rest_api/fedex/fulfilled_shipment";
-import { getUpdateTrack } from "../rest_api/shopify/update_track_shipment";
-import Shopify from "@shopify/shopify-api"; 
+import { getFulfilled } from "../rest_api/fedex/fulfilled_shipment"; 
+import Shopify, { DataType } from '@shopify/shopify-api';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+const crypto = require('crypto');
 
 export async function getShippingFulfilled(ctx){
-
    const resault = await parseShopifyRequest(ctx);
-   return resault;
-    
+   return resault;  
+}
+
+async function verifyShopifyHook(data, ctx) {
+  var digest = crypto.createHmac('SHA256', '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')
+          .update(data)
+          .digest('base64');
+       console.log('generated digest',digest);  
+       console.log('shopify digest',ctx.req.headers['X-Shopify-Hmac-Sha256']); 
+       const hmac = ctx.request.get('X-Shopify-Hmac-Sha256');
+       console.log('hmac', hmac);
+  
+  return digest === ctx.request.get('X-Shopify-Hmac-Sha256');
 }
 
 async function parseShopifyRequest(ctx){
-
     const buffers = [];
-
     for await (const chunk of ctx.req) {
         buffers.push(chunk);
     }
+    const data = Buffer.concat(buffers).toString();  
+    if ( await verifyShopifyHook(data,ctx)) {
+      ctx.res.writeHead(200);
+      ctx.res.end('Verified webhook');
+      console.log('verifyed');
+  } else {
+    ctx.res.writeHead(401);
+    ctx.res.end('Unverified webhook');
+    console.log('Unverifyed');
+    ctx.throw(401,'UnAuthorization');
+  }
 
-    const data = Buffer.concat(buffers).toString();
+    const shopFromHeader = ctx.request.headers['x-shopify-shop-domain'];
+    const user = await prisma.user.findFirst({
+      where: {
+        shop_url: shopFromHeader,
+      },
+    }) 
+    //const userName = user.user_name;
+    //const password = user.password;
+    
     // data to be sent to egyptExpress
     const dataJson = JSON.parse(data);
-    
-    const userName = "ELSFQA";
-    const password = "ZLRGVp+ZyjT6hW8Xg1PJBA==";
-    const accountNo = "EGV26o+Ie18pfk93HhpX2w==";
+    console.log(dataJson);
+    const userName = user.user_name;//"ELSFQA";
+    const password = user.password;//"ZLRGVp+ZyjT6hW8Xg1PJBA==";
+    const accountNo = user.account_number;//"EGV26o+Ie18pfk93HhpX2w==";
     const airWayBillCreatedBy = "Elsfqa User Name";
     const CODAmount = 0;
     const CODCurrency = "";
@@ -33,7 +63,7 @@ async function parseShopifyRequest(ctx){
     const dutyConsigneePay = 0;
     const goodsDescription = "Mobile Accessories";
     const numberofPeices = 1;
-    const origin_shopify = "ALX";// $city;//from database
+    const origin_shopify = user.city;//"ALX";// $city;//from database
     const origin = mapCities(origin_shopify);//"CAI";
     const productType = "FRE";
     const receiversAddress1 = dataJson.shipping_address.address1 ? dataJson.shipping_address.address1 : ""  ; //"2nd Ind. zone";
@@ -49,16 +79,16 @@ async function parseShopifyRequest(ctx){
     const receiversPinCode = dataJson.shipping_address.zip; //"";
     const receiversProvince = dataJson.shipping_address.province; //"";
     const receiversSubCity = "";
-    const sendersAddress1 = "Masaken Street";
-    const sendersAddress2 = "Helipolis";
-    const sendersCity = "Helipolis";
-    const sendersCompany = "Egypt Express";
-    const sendersContactPerson = "Mr.Amin";
-    const sendersCountry = "Egypt";
-    const sendersEmail = "itm@egyptepxress.eg";
+    const sendersAddress1 = user.address1;//"Masaken Street";
+    const sendersAddress2 = user.address2;//"Helipolis";
+    const sendersCity = user.city;//"Helipolis";
+    const sendersCompany = user.company;//"Egypt Express";
+    const sendersContactPerson = user.contact;//"Mr.Amin";
+    const sendersCountry = user.country;//"Egypt";
+    const sendersEmail = user.email;//"itm@egyptepxress.eg";
     const sendersGeoLocation = "";
-    const sendersMobile = "11222333";
-    const sendersPhone = "11222333";
+    const sendersMobile = user.mobile;//"11222333";
+    const sendersPhone = user.mobile;//"11222333";
     const sendersPinCode = "";
     const sendersSubCity = "";
     const serviceType = "FRG";
@@ -125,38 +155,41 @@ async function parseShopifyRequest(ctx){
 
     }
 
-
     const result = await getFulfilled(dataToPost);
     
     // // prepare params to update tracking number
     const trackingNumber = result.AirwayBillNumber;
     const orderId = dataJson.id;
-    const fulfillmentId = dataJson.fulfillments[0].id;
+    const fulfillmentId = dataJson.fulfillments[dataJson.fulfillments.length -1].id;
 
-     const shop_url = "https://mystagstore.myshopify.com";
-     const access_token = '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';
+    // get order_status_url
+    const order_status_url = dataJson.order_status_url;
+    // get shop from the order status
+    let urlArr = order_status_url.split('/',3);
+    const shop = urlArr[2];
+    console.log('shop : ',shop);
+    // select the shop object from db
+    const shopSession = await prisma.shopSession.findFirst({
+      where: {
+        shop: shop,
+      },
+    })
+    // get accessToken from shopSession
+    const accessToken = shopSession.payload.accessToken;
+    console.log('accessToken :',accessToken);
 
-    //const { shop, accessToken } = ctx.state.shopify;
-
-    //const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
-    //console.log('session from token ',shop);
-
-
-
-
-    const payloadToUpdateTrack = {
-      fulfillment : {
-        tracking_number : trackingNumber,
-        id : orderId
-      }
-    }
-
-    //update traking number
-    const resultUpdateTrack = await getUpdateTrack(payloadToUpdateTrack,shop_url, access_token, orderId, fulfillmentId)
-
+    const client = new Shopify.Clients.Rest(shop, accessToken);
+    const dataresult = await client.put({
+      path: `orders/${orderId}/fulfillments/${fulfillmentId}`,
+      data: {"fulfillment":{"tracking_number":trackingNumber,
+                            "id":fulfillmentId,
+                            "tracking_company":'Egypt Express',
+                            "tracking_url":'https://www.egyptexpress.com.eg/en/home/index',
+                          }},
+      type: DataType.JSON,  
+    });
+    console.log(dataresult);
     
-    // update tracking link
-
     return result;
     
 }

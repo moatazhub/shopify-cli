@@ -1,8 +1,13 @@
 import { mapCities, computeWieght } from "../helpers/helper";
 import { getRate } from "../rest_api/fedex/rate_finder";
+import {PrismaClient} from '@prisma/client';
+
+
 
 
 export async function getShippingRate(ctx){
+
+  console.log(ctx.request.headers['x-shopify-shop-domain']);
 
    const resault = await parseShopifyRequest(ctx);
    return resault;
@@ -11,7 +16,7 @@ export async function getShippingRate(ctx){
 
 async function parseShopifyRequest(ctx){
     
-
+    
     const buffers = [];
 
     for await (const chunk of ctx.req) {
@@ -23,6 +28,7 @@ async function parseShopifyRequest(ctx){
     console.log('posted data from postman',data);
    // ctx.disableBodyParser = true;
     const dataJson = JSON.parse(data);
+    console.log(dataJson);
     const shopifyOrigin = dataJson.rate.origin.province;
     const shopifyDestination = dataJson.rate.destination.province;
     const items = dataJson.rate.items;
@@ -36,9 +42,20 @@ async function parseShopifyRequest(ctx){
     console.log(qty);
     console.log(weight);
 
+    const shopFromHeader = ctx.request.headers['x-shopify-shop-domain'];
+    // select the user object from db
+    const prisma = new PrismaClient();
+    const user = await prisma.user.findFirst({
+      where: {
+        shop_url: shopFromHeader,
+      },
+    })
+    const userName = user.user_name;
+    const password = user.password;
+
     const dataToPost = {
-        "UserName" : "ELSFQA",
-        "Password" : "ZLRGVp+ZyjT6hW8Xg1PJBA==",
+        "UserName" : userName,
+        "Password" : password,
         "Origin" : fedexOrigin,
         "Destination" : fedexDestination,
         "PaymentMethod" : "AC",

@@ -63,16 +63,20 @@ module.exports = {
 
     async update(ctx){
         try{
-            const result = await ctx.db.appSession.update({
+            const result = await ctx.db.appSession.update(
+            {
                  
                 shop : ctx.request.body.shop,
                 payload : ctx.request.body.payload,
                
-            }, {
+            }, 
+            {
                where:{
                 sessionId : ctx.params.sessionId
                } 
-            });
+            }
+            
+            );
             result === 0 ? ctx.throw(500, ' invalid sessionId provides'): ctx.body = `updated the session withe id ${ctx.params.sessionId}`;
 
 

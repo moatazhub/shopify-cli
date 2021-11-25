@@ -1,20 +1,11 @@
-
-
-class Index extends React.Component{
+import {Heading, Page} from '@shopify/polaris';
  
-  render(){
-    return(
-     <p>index page..</p>
-
-    )
-  }
-
+const Index = () =>(
+  <Page>
+    <Heading>
+      shopify app ...
+    </Heading>
+  </Page>
+);
  
-  
-
-}
-    
- 
-
-
 export default Index;

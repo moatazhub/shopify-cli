@@ -24,7 +24,7 @@ const Dashboard = () => {
 
     const GET_ORDERS = gql`
     query{
-      orders(first:3,query:"fulfillment_status:shipped"){ 
+      orders(first:3,reverse:true,query:"fulfillment_status:shipped"){ 
         edges{
           node{
             name
@@ -56,6 +56,92 @@ const Dashboard = () => {
     if(error) return <div>{error.message}</div>
       console.log('this is data',data.orders.edges)
 
+    // testing data
+  
+    const data123 = {
+        "orders": {
+          "edges": [
+            {
+              "node": {
+                "name": "#1001",
+                "id": "gid://shopify/Order/4021998813369",
+                "fulfillments": [
+                  {
+                    "trackingInfo": [
+                      {
+                        "number": "101002479"
+                      }
+                    ]
+                  }
+                ],
+                "customer": {
+                  "firstName": "motaz"
+                },
+                "totalWeight": "3000",
+                "currencyCode": "EGP",
+                "totalPriceSet": {
+                  "shopMoney": {
+                    "amount": "21.99"
+                  }
+                }
+              }
+            },
+            {
+              "node": {
+                "name": "#1002",
+                "id": "gid://shopify/Order/4021999730873",
+                "fulfillments": [
+                  {
+                    "trackingInfo": [
+                      {
+                        "number": "101002478"
+                      }
+                    ]
+                  }
+                ],
+                "customer": {
+                  "firstName": "motaz"
+                },
+                "totalWeight": "5000",
+                "currencyCode": "EGP",
+                "totalPriceSet": {
+                  "shopMoney": {
+                    "amount": "109.99"
+                  }
+                }
+              }
+            },
+            {
+              "node": {
+                "name": "#1003",
+                "id": "gid://shopify/Order/4022001172665",
+                "fulfillments": [
+                  {
+                    "trackingInfo": [
+                      {
+                        "number": "101002471"
+                      }
+                    ]
+                  }
+                ],
+                "customer": {
+                  "firstName": "motaz"
+                },
+                "totalWeight": "0",
+                "currencyCode": "EGP",
+                "totalPriceSet": {
+                  "shopMoney": {
+                    "amount": "275.0"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+   
+
+
     // console.log('this is data',data.orders.edges[0].node.name)
      // console.log('this is data2',data.orders.edges[0].node.fulfillments[0].trackingInfo[0].number);
 
@@ -68,23 +154,31 @@ const Dashboard = () => {
     },
     ];
 
-    
+    const ordersRows = [];
     const bulkActions = [
     {
-      content: 'Add tags',
+      content: 'Add tag',
       onAction: async () => {
         let bulkResult = [];
         console.log(selectedItems);
         let i = 0;
         for(const item of selectedItems){
           
-          const  result =  await  axios.post(`https://murmuring-sierra-22719.herokuapp.com/api/shipping-track?id=${item}`);
+          const  result =  await  axios.post(`https://10278f51fe83.ngrok.io/api/shipping-track?id=${item}`);
           bulkResult[i] = result.data;
           i++;
         }
         
         setDataBulk(bulkResult);
-        console.log(dataBulk);
+        console.log('result from loop',bulkResult);
+        
+        for(let oneResult of bulkResult) {
+          // ordersRows.push(<ul>);
+           ordersRows.push(<li> {oneResult.AirwayBillTrackList[0].AirWayBillNo} </li>);
+           console.log('oneResult.Description',oneResult.AirwayBillTrackList[0].AirWayBillNo);
+          // ordersRows.push(</ul>);
+        }
+        console.log('orderRows',ordersRows);
         handleChangeBulk();
 
       } ,
@@ -108,7 +202,7 @@ const Dashboard = () => {
 
    <Card>
       <ResourceList
-        resourceName={{singular: 'orderrr', plural: 'orders'}}
+        resourceName={{singular: 'order', plural: 'orderss'}}
         items={data.orders.edges}
         renderItem={renderItem}
         selectedItems={selectedItems}
@@ -137,6 +231,7 @@ const Dashboard = () => {
         <Modal.Section>
          
          <Heading>Tracking Info</Heading>
+           {console.log('data model before: ',dataModel)}
            {Object.entries(dataModel).map(([name, value]) => (
             <TextContainer>
               <List type="bullet">
@@ -146,18 +241,13 @@ const Dashboard = () => {
              </TextContainer>
            ))}
 
-          <Heading>Tracking Log Details</Heading>
-           {Object.entries(dataModel.TrackingLogDetails[0]).map(([name, value]) => (
-            <TextContainer>
-              <List type="bullet">
-                <List.Item>{name} : {value.toString()}</List.Item>
-              </List>
-             </TextContainer>
-           ))}
+          
               
         </Modal.Section>
         <Modal.Section>
+        <Heading>Tracking Log Detailss</Heading>
         
+          
         </Modal.Section>
       </Modal>
     </div>
@@ -175,17 +265,16 @@ const Dashboard = () => {
         ]}
       >
         <Modal.Section>
-          <TextContainer>
+        
+        {ordersRows}
           
-          
-          
-          </TextContainer>
         </Modal.Section>
         <Modal.Section>
         
         </Modal.Section>
       </Modal>
     </div>
+   
     </>
   )
 
@@ -206,7 +295,7 @@ const Dashboard = () => {
           >
               <Stack>
               <Stack.Item fill >
-                    <Heading> Orders </Heading>
+                    <Heading> Ordersss </Heading>
               </Stack.Item>
 
               <Stack.Item fill >
@@ -242,12 +331,14 @@ const Dashboard = () => {
                     
                    // setLoadingLink(true);   
                     //setTimeout(() => {  console.log("World!"); }, 4000);
-                    const result = await  axios.post(`https://murmuring-sierra-22719.herokuapp.com/api/shipping-track?id=${trackingNumber}`);
+                    setDataModel({});
+                    const result = await  axios.post(`https://10278f51fe83.ngrok.io/api/shipping-track?id=${trackingNumber}`);
                    // console.log("details:",result.data.AirwayBillTrackList[0].Destination);
                     console.log(result.data);
                    // if(Array.isArray(result.data.AirwayBillTrackList[0].TrackingLogDetails) && result.data.AirwayBillTrackList.TrackingLogDetails)
                       // console.log('is an array and not empty..')
                        setDataModel(result.data.AirwayBillTrackList[0]);
+                       console.log('data model : ',dataModel);
                     handleChange();
                     
                    // setLoadingLink(false);
@@ -279,7 +370,7 @@ const Dashboard = () => {
             
                    // setLoadingLink(true);   
                     //setTimeout(() => {  console.log("World!"); }, 4000);
-                    const result = await axios.post(`https://60fbcecd9d09.ngrok.io/api/shipping-pdf?id=${trackingNumber}`);
+                    const result = await axios.post(`https://10278f51fe83.ngrok.io/api/shipping-pdf?id=${trackingNumber}`);
                    // console.log("details:",result.data.ReportDoc);
                     //var b64 = result.data.ReportDoc;
                     downloadPDF(result.data.ReportDoc);
@@ -327,7 +418,7 @@ const Dashboard = () => {
   function downloadPDF(pdf) {
     const linkSource = `data:application/pdf;base64,${pdf}`;
     const downloadLink = document.createElement("a");
-    const fileName = "vct_illustration.pdf";
+    const fileName = "egypt_exprss_print.pdf";
 
     downloadLink.href = linkSource;
     downloadLink.download = fileName;
