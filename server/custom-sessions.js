@@ -2,7 +2,10 @@ import { PrismaClient } from '@prisma/client';
 
 import { Session } from '@shopify/shopify-api/dist/auth/session';
 
+
 const prisma = new PrismaClient();
+
+let domain = '';
 
 module.exports.storeCallback = async function storeCallback(session){
   console.log('Running storeCallback')
@@ -12,10 +15,15 @@ module.exports.storeCallback = async function storeCallback(session){
     console.log(session)
     console.log('StoreCallback Payload===============================')
     console.log(payload)
+
+    if(session.id.indexOf(`${session.shop}`) > -1){
+        domain = session.id;
+    }
+
     return prisma.shopSession.upsert({
-        where: { id: session.id },
-        create: { id: session.id, payload: payload, shop: payload.shop },
-        update: { payload: payload}
+        where: {  shop: session.shop },
+        create: { session_id: session.id, domain_id:domain, payload: payload, shop: session.shop },
+        update: { session_id: session.id, domain_id:domain, payload: payload}
 
     }).then(_ => {
         return true
@@ -27,14 +35,22 @@ module.exports.storeCallback = async function storeCallback(session){
 module.exports.loadCallback = async function loadCallback(id) {
     console.log('loadCallback ID===============================')
         console.log(id)
-    return prisma.shopSession.findUnique({
-        where: { id: id }
+    return prisma.shopSession.findFirst({
+        where: {
+            OR:[
+                {session_id: id},
+                {domain_id: id }
+            ] 
+        }
     }).then(data => {
         if (!data) {
+            console.log('undefind.....')
             return undefined
         }
-
-        const session = new Session(data.id)
+        console.log('before inialize.....')
+        const session = new Session(id)
+        console.log('after inialize.....')
+        console.log('session.....',session)
         // @ts-ignore
         const { shop, state, scope, accessToken, isOnline, expires, onlineAccessInfo } = data.payload
         session.shop = shop
@@ -49,7 +65,9 @@ module.exports.loadCallback = async function loadCallback(id) {
         console.log(session)
         return session
     }).catch(err => {
-        return undefined
+        
+        console.log('errrrrrr',err);
+        return undefined;
     })
 }
 

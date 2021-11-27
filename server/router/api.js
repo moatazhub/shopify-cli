@@ -3,11 +3,13 @@ import { getShippingRate } from '../controllers/shipping_rate_controller';
 import { getTrackingShipment } from '../controllers/track_shipment_controller';
 import { getPdfShipment } from '../controllers/pdf_shipment_controller';
 import { getShippingFulfilled } from '../controllers/shipping_fulfilled_controller';
+import { getOrders } from '../controllers/order_controller';
 const {UserController, AppSession} = require('../controllers');
 const koaBody = require('koa-body');
 //const bodyParser = require('koa-parser');
 const bodyParser = require('koa-bodyparser');
 import { PrismaClient } from '@prisma/client';
+
 
 const prisma = new PrismaClient();
 
@@ -91,7 +93,7 @@ router.post('/shipping-fulfilled', async (ctx) => {
 
 
 
-router.post('/shipping-track', async (ctx) => {
+  router.post('/shipping-track', async (ctx) => {
   //     ctx.body = 'post rquest ..';
          const id = ctx.request.query.id;
   //     const data = ctx.req.body.data;
@@ -104,6 +106,13 @@ router.post('/shipping-track', async (ctx) => {
     ctx.body = result;
   
     
+  });
+
+  //  get fulfilled orders
+  router.get('/orders', async (ctx) => {
+
+    const result =  await getOrders(ctx);
+    ctx.body = result; 
   });
 
   router.post('/shipping-pdf', async (ctx) => {
@@ -165,5 +174,7 @@ router.post('/shipping-track', async (ctx) => {
      router.get('/sessions',AppSession.find); 
      router.delete('/sessions/:sessionId', AppSession.destroy);
      router.put('/sessions/:sessionId',koaBody(),AppSession.update);
+
+    
 
 export default router; 

@@ -11,8 +11,10 @@ datasource db {
 }
 
 model ShopSession {
-  id      String @id
-  shop    String? 
+  id      Int @id @default(autoincrement())
+  shop    String? @unique
+  session_id String
+  domain_id String
   payload Json
   
 }
