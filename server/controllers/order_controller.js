@@ -17,7 +17,7 @@ export async function getOrders(ctx){
     const accessToken = shopSession.payload.accessToken;
     //console.log('accessToken :',accessToken);
 
-    const client = new Shopify.Clients.Rest( shop, accessToken);
+    const client = new Shopify.Clients.Rest( session.shop, accessToken);
     const data = await client.get({
     path: 'orders',
     query: {"fulfillment_status":"shipped","fields":"id,created_at,name,total-price,fulfillments"},

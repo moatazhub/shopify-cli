@@ -25,14 +25,13 @@ function Aboutus() {
       // Runs once, after mounting 
       async function fetchUser() {
         const token = await getSessionToken(app);
-        console.log('session token : ',token);
+        console.log('session token :',token);
        
         ////const id = "mystagstore.myshopify.com";
-        const url = `https://4b5129af4348.ngrok.io/api/orders`;
+        const url = `https://murmuring-sierra-22719.herokuapp.com/api/users`;
         const result = await  axios.get(url,{ headers: { Authorization: `Bearer ${token}` }});
         console.log(result.data);
-        console.log('name:',result.data.name);
-             
+       
               // var user = result.data.filter(function (obj) { 
               //     return obj.shop_url === shop_url; 
               // })[0];
@@ -53,10 +52,11 @@ function Aboutus() {
     const handleSubmit = async event => {
       const token = await getSessionToken(app);
       event.preventDefault();
+
       setSubmitting(true);
       // calling API
       //const id = "mystagstore.myshopify.com";
-      const url = `https://4b5129af4348.ngrok.io/api/users`;
+      const url = `https://murmuring-sierra-22719.herokuapp.com/api/users`;
       const payload = {
                 "account_number" : formData.account_number ,
                 "user_name" : formData.user_name,

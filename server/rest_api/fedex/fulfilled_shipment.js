@@ -1,6 +1,7 @@
 import axios from "axios";
 
 export async function getFulfilled(dataToPost){
+    console.log('data to be post : ',dataToPost);
     const url = 'http://82.129.197.86:1929/EGEXPService.svc/CreateAirwayBill';
     const header = {
         'Content-Type' : 'application/json' 

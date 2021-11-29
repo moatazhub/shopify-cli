@@ -82,7 +82,9 @@ async function parseShopifyRequest(ctx){
     const sendersAddress1 = user.address1;//"Masaken Street";
     const sendersAddress2 = user.address2;//"Helipolis";
     const sendersCity = user.city;//"Helipolis";
-    const sendersCompany = user.company;//"Egypt Express";
+    if(user.company === null ) 
+       user.company = "";
+    const sendersCompany = user.company; //"Egypt Express";
     const sendersContactPerson = user.contact;//"Mr.Amin";
     const sendersCountry = user.country;//"Egypt";
     const sendersEmail = user.email;//"itm@egyptepxress.eg";

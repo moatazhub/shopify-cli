@@ -22,6 +22,7 @@ function userLoggedInFetch(app) {
       );
 
       const redirect = Redirect.create(app);
+      
       redirect.dispatch(Redirect.Action.APP, authUrlHeader || `/auth`);
       return null;
     }
@@ -30,9 +31,9 @@ function userLoggedInFetch(app) {
   };
 }
 
-function MyProvider(props) {
+ function MyProvider(props) {
   const app = useAppBridge();
-  getSessionToken(app).then(token =>{
+   getSessionToken(app).then(token =>{
     console.log('print session token : ', token);
   })
 

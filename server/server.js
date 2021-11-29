@@ -201,18 +201,19 @@ app.prepare().then(async () => {
   router.get("/dashboard", handleRequest); 
   // router for about
   router.get("/about", handleRequest); 
+  router.get("/orders", handleRequest);
   
   // Register routing middleware
   server.use(router.allowedMethods());
   server.use(router.routes());
   
 
-  const db = require('../models');
-  db.sequelize.sync()
-     .then(() => console.log('models sysced!'))
-     .catch(err => console.log(err));
+  // const db = require('../models');
+  // db.sequelize.sync()
+  //    .then(() => console.log('models sysced!'))
+  //    .catch(err => console.log(err));
   
-  server.context.db = db;   
+  // server.context.db = db;   
 
   server.listen(port, () => {
     console.log(`> Ready on http://localhost:${port}`);
