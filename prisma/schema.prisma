@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root:root@localhost:3306/shopify"
+  url      = "mysql://b1aa0762f2947d:065fccc9@us-cdbr-east-04.cleardb.com/heroku_5a430751f6e76f7"
 }
 
 model ShopSession {
