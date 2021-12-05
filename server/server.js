@@ -36,7 +36,7 @@ Shopify.Context.initialize({
   API_KEY: process.env.SHOPIFY_API_KEY,
   API_SECRET_KEY: process.env.SHOPIFY_API_SECRET,
   SCOPES: process.env.SCOPES.split(","),
-  HOST_NAME: process.env.HOSTLT.replace(/https:\/\//, ""),
+  HOST_NAME: process.env.HOST.replace(/https:\/\//, ""),
   API_VERSION: ApiVersion.April21,
   IS_EMBEDDED_APP: true,
   // This should be replaced with your preferred storage strategy
@@ -67,6 +67,7 @@ app.prepare().then(async () => {
   server.keys = [Shopify.Context.API_SECRET_KEY];
   server.use(
     createShopifyAuth({
+      //accessMode: "offline",
       async afterAuth(ctx) {
         // Access token and shop available in ctx.state.shopify
         const { shop, accessToken, scope } = ctx.state.shopify;
@@ -198,9 +199,9 @@ app.prepare().then(async () => {
   // router for index
   //router.get("/index", handleRequest); 
   // router for dashboard
-  router.get("/dashboard", handleRequest); 
-  // router for about
   router.get("/about", handleRequest); 
+  // router for about
+  router.get("/setting", handleRequest); 
   router.get("/orders", handleRequest);
   
   // Register routing middleware
