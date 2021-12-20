@@ -4,8 +4,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function getOrders(ctx){
-
-    const session = await Shopify.Utils.loadCurrentSession(ctx.request, ctx.response);
+    // staticShop =  'mystagstore.myshopify.com';
+    const session = await Shopify.Utils.loadCurrentSession(ctx.request, ctx.response,false);
     //const shop = 'mystagstore.myshopify.com';
     // select the shop object from db
     const shopSession = await prisma.shopSession.findFirst({
@@ -20,7 +20,7 @@ export async function getOrders(ctx){
     const client = new Shopify.Clients.Rest( session.shop, accessToken);
     const data = await client.get({
     path: 'orders',
-    query: {"fulfillment_status":"shipped","fields":"id,created_at,name,total-price,fulfillments"},
+    query: {"fulfillment_status":"shipped","status":"any", "fields":"id,created_at,name,total-price,fulfillments"},
     });
     console.log('order data :',JSON.stringify(data.body));
     return data;

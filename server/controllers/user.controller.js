@@ -40,8 +40,8 @@ module.exports = {
 
     async findOne(ctx){
 
-         const session = await Shopify.Utils.loadCurrentSession(ctx.request, ctx.response);
-         console.log(session);
+            const session = await Shopify.Utils.loadCurrentSession(ctx.request, ctx.response, false);
+            console.log(session);
         // try{
         //     const user = await ctx.db.Account.findOne({
         //         where:{
@@ -97,7 +97,7 @@ module.exports = {
     async update(ctx){
         try{
 
-            const session = await Shopify.Utils.loadCurrentSession(ctx.request, ctx.response);
+            const session = await Shopify.Utils.loadCurrentSession(ctx.request, ctx.response, false);
             console.log(session);
 
             // const result = await ctx.db.Account.update({

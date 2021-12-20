@@ -3,7 +3,8 @@ import {Card, Subheading, ResourceList, ResourceItem, Stack,Page,Layout, TextFie
 import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import {useAppBridge} from '@shopify/app-bridge-react';
-import {getSessionToken} from '@shopify/app-bridge-utils';
+import {getSessionToken} from '@shopify/app-bridge-utils';  
+const mergeImages = require('merge-base64');
 
 const orders = () => {
     const [selectedItems, setSelectedItems] = useState([]);
@@ -27,7 +28,16 @@ const orders = () => {
           const url = `https://murmuring-sierra-22719.herokuapp.com/api/orders`;
           const result = await  axios.get(url,{ headers: { Authorization: `Bearer ${token}` }});
           console.log(result.data);
-          setSelectedOrders(result.data.body.orders);
+
+
+          // filter orders to be as a non empty tracking number && shipping method by egypt express
+          const filteredResult = result.data.body.orders;
+          const filteredResult2 = filteredResult.filter(item => item.fulfillments[item.fulfillments.length -1].tracking_number != null && item.fulfillments[item.fulfillments.length -1].tracking_company == "Egypt Express" );
+          //const tracking_number = item.fulfillments[item.fulfillments.length -1].tracking_number;
+          setSelectedOrders(filteredResult2);  
+
+
+         /// setSelectedOrders(result.data.body.orders);
                 
               }
             fetchOrders();
@@ -44,10 +54,14 @@ const orders = () => {
             onAction: async () => {
               let bulkResult = [];
               console.log(selectedItems);
+              const token = await getSessionToken(app);
               let i = 0;
               for(const item of selectedItems){
-                
-                const  result =  await  axios.post(`https://murmuring-sierra-22719.herokuapp.com/api/shipping-track?id=${item}`);
+
+                const url = `https://murmuring-sierra-22719.herokuapp.com/api/shipping-track?id=${item}`;
+                const result = await  axios.post(url, {},{ headers: { Authorization: `Bearer ${token}` }});
+
+               // const  result =  await  axios.post(`https://af42-41-238-83-52.ngrok.io/api/shipping-track?id=${item}`);
                 bulkResult[i] = result.data;
                 i++;
               }
@@ -93,17 +107,27 @@ const orders = () => {
           {
             content: 'Print shipment PDFs',
             onAction: async () => {
-              let bulkPdfResult = '';
+              let bulkPdfResult = [];
+              let mergedImage = '';
               //console.log(selectedItems);
-             
+              const token = await getSessionToken(app);
               for(const item of selectedItems){
-                const result = await axios.post(`https://murmuring-sierra-22719.herokuapp.com/api/shipping-pdf?id=${item}`);
-               // bulkPdfResult =+ result.data.ReportDoc;
+               
+                const url = `https://murmuring-sierra-22719.herokuapp.com/api/shipping-pdf?id=${item}`;
+                const result = await  axios.post(url, {},{ headers: { Authorization: `Bearer ${token}` }});
+
+
+               // const result = await axios.post(`https://af42-41-238-83-52.ngrok.io/api/shipping-pdf?id=${item}`);
+                //bulkPdfResult = result.data.ReportDoc;
+               // mergedImage = await mergeImages(result.data.ReportDoc,result.data.ReportDoc);
+              //  bulkPdfResult.push = result.data.ReportDoc;
+                
+                
                 downloadPDF(result.data.ReportDoc);
                 
               }
-              //setDataBulkPdf(bulkPdfResult);
-              //downloadPDF(dataBulkPdf);   
+             // mergedImage = await mergeImages([bulkPdfResult, bulkPdfResult]);
+             // downloadPDF(mergedImage);   
              // handleChangeBulk();
       
             } ,
@@ -133,9 +157,20 @@ const orders = () => {
 
     return(
         <>
+        <img
+          alt=""
+         
+          
+          style={{
+            margin : 10,
+            marginLeft :48,
+            objectPosition: 'center',
+          }}
+          src="https://i.ibb.co/jr7Nd4j/logo.png"
+        />  
          <Page
         
-        title="Tracking your Package"
+        title="Tracking your Package..."
         divider
         >  
         
@@ -144,6 +179,7 @@ const orders = () => {
     title="Tracking information"
     description="Here you can view delivery dates and tracking information for your orders."
   >
+    
            <Card>
            <ResourceList
              resourceName={{singular: 'order', plural: 'orderss'}}
@@ -258,7 +294,13 @@ const orders = () => {
                             // setLoadingLink(true);   
                             //setTimeout(() => {  console.log("World!"); }, 4000);
                             setDataModel({});
-                            const result = await  axios.post(`https://murmuring-sierra-22719.herokuapp.com/api/shipping-track?id=${tracking_number}`);
+                            // prepare request for axios
+                            const token = await getSessionToken(app);
+                            console.log('token from track :',token);
+                            const url = `https://murmuring-sierra-22719.herokuapp.com/api/shipping-track?id=${tracking_number}`;
+                            const result = await  axios.post(url, {},{ headers: { Authorization: `Bearer ${token}` }});
+
+                           // const result = await  axios.post(`https://af42-41-238-83-52.ngrok.io/api/shipping-track?id=${tracking_number}`);
                             // console.log("details:",result.data.AirwayBillTrackList[0].Destination);
                             console.log(result.data);
                             // if(Array.isArray(result.data.AirwayBillTrackList[0].TrackingLogDetails) && result.data.AirwayBillTrackList.TrackingLogDetails)
@@ -286,7 +328,15 @@ const orders = () => {
                   <Button
                       plain
                       onClick = {async() => {
-                      const result = await axios.post(`https://murmuring-sierra-22719.herokuapp.com/api/shipping-pdf?id=${tracking_number}`);
+
+                        // prepare request for axios
+                        const token = await getSessionToken(app);
+                       // console.log('token from track :',token);
+                        const url = `https://murmuring-sierra-22719.herokuapp.com/api/shipping-pdf?id=${tracking_number}`;
+                        const result = await  axios.post(url, {},{ headers: { Authorization: `Bearer ${token}` }});
+
+
+                     // const result = await axios.post(`https://af42-41-238-83-52.ngrok.io/api/shipping-pdf?id=${tracking_number}`);
                       downloadPDF(result.data.ReportDoc);   
                       }} >
                         {tracking_number}

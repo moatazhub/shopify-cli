@@ -29,16 +29,16 @@ async function parseShopifyRequest(ctx){
         buffers.push(chunk);
     }
     const data = Buffer.concat(buffers).toString();  
-    if ( await verifyShopifyHook(data,ctx)) {
-      ctx.res.writeHead(200);
-      ctx.res.end('Verified webhook');
-      console.log('verifyed');
-  } else {
-    ctx.res.writeHead(401);
-    ctx.res.end('Unverified webhook');
-    console.log('Unverifyed');
-    ctx.throw(401,'UnAuthorization');
-  }
+//     if ( await verifyShopifyHook(data,ctx)) {
+//       ctx.res.writeHead(200);
+//       ctx.res.end('Verified webhook');
+//       console.log('verifyed');
+//   } else {
+//     ctx.res.writeHead(401);
+//     ctx.res.end('Unverified webhook');
+//     console.log('Unverifyed');
+//     ctx.throw(401,'UnAuthorization');
+//   }
 
     const shopFromHeader = ctx.request.headers['x-shopify-shop-domain'];
     const user = await prisma.user.findFirst({
@@ -51,6 +51,13 @@ async function parseShopifyRequest(ctx){
     
     // data to be sent to egyptExpress
     const dataJson = JSON.parse(data);
+    if(dataJson.fulfillments[dataJson.fulfillments.length -1].tracking_company != "Egypt Express"){
+     // ctx.res.writeHead(404);
+      //ctx.res.end('Invalid tracking comapny');
+     // console.log('Invalid tracking comapny.');
+     // ctx.throw(401,'Invalid tracking comapny');
+     return;
+    }
     console.log(dataJson);
     const userName = user.user_name;//"ELSFQA";
     const password = user.password;//"ZLRGVp+ZyjT6hW8Xg1PJBA==";
@@ -63,6 +70,8 @@ async function parseShopifyRequest(ctx){
     const dutyConsigneePay = 0;
     const goodsDescription = "Mobile Accessories";
     const numberofPeices = 1;
+    if(user.city === null ) 
+       user.city = "SU";
     const origin_shopify = user.city;//"ALX";// $city;//from database
     const origin = mapCities(origin_shopify);//"CAI";
     const productType = "FRE";
@@ -79,17 +88,31 @@ async function parseShopifyRequest(ctx){
     const receiversPinCode = dataJson.shipping_address.zip; //"";
     const receiversProvince = dataJson.shipping_address.province; //"";
     const receiversSubCity = "";
+    if(user.address1 === null ) 
+       user.address1 = "";
     const sendersAddress1 = user.address1;//"Masaken Street";
+    if(user.address2 === null ) 
+       user.address2 = "";
     const sendersAddress2 = user.address2;//"Helipolis";
     const sendersCity = user.city;//"Helipolis";
     if(user.company === null ) 
        user.company = "";
     const sendersCompany = user.company; //"Egypt Express";
+    if(user.contact === null ) 
+       user.contact = "";
     const sendersContactPerson = user.contact;//"Mr.Amin";
+    if(user.country === null ) 
+       user.country = "";
     const sendersCountry = user.country;//"Egypt";
+    if(user.email === null ) 
+       user.email = "";
     const sendersEmail = user.email;//"itm@egyptepxress.eg";
     const sendersGeoLocation = "";
+    if(user.mobile === null ) 
+       user.mobile = "";
     const sendersMobile = user.mobile;//"11222333";
+    if(user.mobile === null ) 
+       user.mobile = "";
     const sendersPhone = user.mobile;//"11222333";
     const sendersPinCode = "";
     const sendersSubCity = "";
@@ -100,7 +123,7 @@ async function parseShopifyRequest(ctx){
     const shipperReference = "JD123444";
     const shipperVatAccount = "";
     const specialInstruction = "Confirm Location before Delivery";
-    const weight = dataJson.total_weight ;//6;
+    const weight = dataJson.total_weight/1000 ;//6;
       
     const dataToPost = {
 
@@ -160,7 +183,7 @@ async function parseShopifyRequest(ctx){
     const result = await getFulfilled(dataToPost);
     
     // // prepare params to update tracking number
-    const trackingNumber = result.AirwayBillNumber;
+    let trackingNumber = result.AirwayBillNumber;
     const orderId = dataJson.id;
     const fulfillmentId = dataJson.fulfillments[dataJson.fulfillments.length -1].id;
 
@@ -179,6 +202,10 @@ async function parseShopifyRequest(ctx){
     // get accessToken from shopSession
     const accessToken = shopSession.payload.accessToken;
     console.log('accessToken :',accessToken);
+
+    // check if the response for code ==1 or not
+    // if (result.Code != 1)
+    //  trackingNumber = `error : ${result.Description}`;
 
     const client = new Shopify.Clients.Rest(shop, accessToken);
     const dataresult = await client.put({

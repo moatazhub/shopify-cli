@@ -21,8 +21,22 @@ router.get('/', async (ctx) => {
 });
 
 router.get('/all', async (ctx) => {
+    console.log('loggggs')
     ctx.body = 'Get all scrip tag';
 });
+
+// mandatory webhooks
+router.post('/webhooks/customer/reduct', async (ctx) => {
+   ctx.res.writeHead(200);    
+});
+
+router.post('/webhooks/shop/reduct', async (ctx) => {
+  ctx.res.writeHead(200);    
+});  
+
+router.post('/webhooks/customers/data_request/reduct', async (ctx) => {
+  ctx.res.writeHead(200);    
+});  
 
 router.post('/shipping-rate',  async (ctx) => {
 //     ctx.body = 'post rquest ..';
@@ -102,7 +116,7 @@ router.post('/shipping-fulfilled', async (ctx) => {
   //    // const id = ctx.request.query.id;
   //    // console.log(id);
   //    // ctx.body = id;
-    const result =  await getTrackingShipment(id);
+    const result =  await getTrackingShipment(id, ctx);
     ctx.body = result;
   
     
@@ -124,7 +138,7 @@ router.post('/shipping-fulfilled', async (ctx) => {
     //    // const id = ctx.request.query.id;
     //    // console.log(id);
     //    // ctx.body = id;
-      const result =  await getPdfShipment(id);
+      const result =  await getPdfShipment(id, ctx);
       ctx.body = result; 
       
     });

@@ -3,7 +3,19 @@ import {Page, Heading, Form, FormLayout, TextField, Button, Select, Card, Spinne
 function About() {
 
     return (
-  
+      <>
+      <img
+          alt=""
+         
+          
+          style={{  
+            margin : 10,
+            marginLeft :48,
+            objectPosition: 'center',
+          }}
+          src="https://i.ibb.co/jr7Nd4j/logo.png"
+        />  
+
         <Page   
          title="About us"
          divider
@@ -20,11 +32,12 @@ function About() {
           Egypt Express (EE) is a joint stock company registered in Egypt and has been the licensee of Federal Express Corporation since 1998. Its  headquarter is in Cairo and it employs more than 700 employees.
           </p>
         </Card>
-        <Card title="Online store dashboard" sectioned>
-          <p> This app help you manage your shipment products in the real-time shipping rates and tracking the order till it safely reaches to your customers.</p>
+        <Card title="Egypt Express shipping App" sectioned>
+          <p> The store owner can integrate Egypt Express shipping in an existing shopify store and offer a delivery method to the customers.</p>
         </Card>
         </Layout.AnnotatedSection>
         </Page>
+        </>
     );
 }
 

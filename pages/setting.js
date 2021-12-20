@@ -224,8 +224,19 @@ function Aboutus() {
     }
 
     return (
-
-     
+      <>
+      <img
+          alt=""
+         
+          
+          style={{
+            margin : 10,
+            marginLeft :48,
+            objectPosition: 'center',
+          }}
+          src="https://i.ibb.co/jr7Nd4j/logo.png"
+        />  
+       
        <Page
         
         title="Egypt Express Setting"
@@ -236,7 +247,7 @@ function Aboutus() {
        
       <Layout.AnnotatedSection
     id="storeDetails"
-    title="Getting started with default credentials"
+    title="Getting started with your credentials"
     description="We just provide a default credentials for testing purpose only and you need to have a production credentials when starting off."
   >
      
@@ -364,7 +375,7 @@ function Aboutus() {
      
       </Layout.AnnotatedSection>
       </Page>
-     
+      </>
     );
   }
 

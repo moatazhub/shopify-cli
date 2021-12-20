@@ -67,7 +67,7 @@ app.prepare().then(async () => {
   server.keys = [Shopify.Context.API_SECRET_KEY];
   server.use(
     createShopifyAuth({
-      //accessMode: "offline",
+      accessMode: "offline",
       async afterAuth(ctx) {
         // Access token and shop available in ctx.state.shopify
         const { shop, accessToken, scope } = ctx.state.shopify;
@@ -102,9 +102,9 @@ app.prepare().then(async () => {
         // create new user
         const user = await prisma.user.create({
           data: {
-            account_number: 'EGV26o+Ie18pfk93HhpX2w==',
-            user_name: 'ELSFQA',
-            password: 'ZLRGVp+ZyjT6hW8Xg1PJBA==',
+            account_number: 'kZGy2o+Ve6s=',
+            user_name: 'WEBSETest',
+            password: 'FBFk9vOanXw=',
             country: 'Egypt',
             shop_url: shop,
           },

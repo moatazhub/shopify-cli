@@ -56,6 +56,10 @@ module.exports.loadCallback = async function loadCallback(id) {
         session.shop = shop
         session.state = state
         session.scope = scope
+       // const date = new Date();
+       // date.setDate(date.getDate() + 1);
+       // console.log('the date :',date);
+       // session.expires = date;
         session.expires = expires ? new Date(expires) : undefined
         session.isOnline = isOnline
         session.accessToken = accessToken
