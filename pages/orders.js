@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import {useAppBridge} from '@shopify/app-bridge-react';
 import {getSessionToken} from '@shopify/app-bridge-utils';  
-const mergeImages = require('merge-base64');
+//const mergeImages = require('merge-base64');
 
 const orders = () => {
     const [selectedItems, setSelectedItems] = useState([]);
